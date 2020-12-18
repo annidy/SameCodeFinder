@@ -16,6 +16,7 @@ import sys
 import fileinput
 import datetime
 from simhash import Simhash, SimhashIndex
+from functools import cmp_to_key
 
 gb_detail  = 0
 gb_max_dis = 20 
@@ -57,34 +58,34 @@ def main():
             gb_output = int(arg_arr[1])
 
     if not suffix:
-        print "You must assign a suffix. eg: \".m\" \".java\""
-    	return 
+        print("You must assign a suffix. eg: \".m\" \".java\"")
+        return 
 
     if not os.path.isdir(root_path):
-        print "You must assign a dir as first input"
+        print("You must assign a dir as first input")
         return 
 
     if funciton_standard == 1:
-        print "Hashing all the functions..."
+        print("Hashing all the functions...")
         hashed_arr  = hash_funcs(root_path, suffix)
     else:
-        print "Hashing all the files..."
+        print("Hashing all the files...")
         hashed_arr  = hash_files(root_path, suffix)
 
     if len(hashed_arr) == 0:
         return
     
-    print "Ranking all the hash results..."
+    print("Ranking all the hash results...")
     ranked_arr  = rank_hash(hashed_arr)
 
-    print "Sorting   all the ranked results..."
-    sorted_arr = sorted(ranked_arr, cmp=lambda x,y:cmp(x[2],y[2]))
+    print("Sorting   all the ranked results...")
+    sorted_arr = sorted(ranked_arr, key=cmp_to_key(lambda x,y:x[2]-y[2]))
 
     output_file = open(gb_output, 'w+')
     for obj in sorted_arr:
-        print >>output_file, obj
+        print(obj, file=output_file)
 
-    print "Finished! Result saved in %s" % (gb_output)
+    print("Finished! Result saved in %s" % (gb_output))
 
 
 def hash_files(root_path, suffix):
@@ -92,7 +93,7 @@ def hash_files(root_path, suffix):
     for file_path in scan_files(root_path, None, suffix):
         single_file_name = file_name(file_path)
         if gb_detail == 1:
-            print "Start Hash File %s" % (single_file_name)
+            print("Start Hash File %s" % (single_file_name))
         signle_file = open(file_path, 'r') 
         single_file_content = signle_file.read() 
         single_hash_result  = Simhash(get_features(single_file_content))
@@ -103,7 +104,7 @@ def hash_funcs(root_path, suffix):
     hashed_arr = []
 
     if not is_suffix_supported(suffix):
-        print "The Funcs Standard SameCodeFinder just support Object-C and Java now. Use \".m\" or \".java\", please"
+        print("The Funcs Standard SameCodeFinder just support Object-C and Java now. Use \".m\" or \".java\", please")
         return hashed_arr
 
     for file_path in scan_files(root_path, None, suffix):
@@ -138,7 +139,7 @@ def hash_funcs(root_path, suffix):
             if single_bracket_count == 0 and is_function_started == 1:
                 single_func_name = "%s(%s)" % (single_file_name, single_beauti_name)
                 if gb_detail == 1:
-                    print "Start Hash Func %s" % (single_func_name)
+                    print("Start Hash Func %s" % (single_func_name))
                 
                 single_hash_result = Simhash(get_features(single_func_content.strip()))
                 if single_line_count >= gb_min_linecount:
@@ -170,7 +171,7 @@ def rank_hash(hashed_arr):
         min_distance = 1000
         same_obj2_name = ""
         if gb_detail == 1:
-            print "Start Rank %s" % (name1)
+            print("Start Rank %s" % (name1))
         for j in range(i + 1, count):
             obj2 = hashed_arr[j]
             name2 = obj2[0]
@@ -212,17 +213,17 @@ def scan_files(directory,prefix=None,postfix=None):
     return files_list 
 
 def file_name(file_path):
-	name_arr=file_path.split("/")
-	file_name=name_arr[len(name_arr) - 1]
-	return file_name
+    name_arr=file_path.split("/")
+    file_name=name_arr[len(name_arr) - 1]
+    return file_name
 
 ############################################
 ############# Language Diversity ###########
 def grammar_regex_by_suffix(suffix):
     if suffix == ".java":
-        return ur"(public|private)(.*)\)\s?{";
+        return r"(public|private)(.*)\)\s?{";
     elif suffix == ".m":
-        return ur"(\-|\+)\s?\(.*\).*(\:\s?\(.*\).*)?{?";
+        return r"(\-|\+)\s?\(.*\).*(\:\s?\(.*\).*)?{?";
 
     return
 
@@ -282,20 +283,20 @@ def beautify_object_c_func_name(func_name):
 ##########################################
 ############ Help ########################
 def print_help(): 
-    print "Usage:\n"
-    print "\tpython SameFileFinder.python [arg0] [arg1]\n"
-    print "Args:\n"
-    print "\t[arg0] - Target Directory of files should be scan"
-    print "\t[arg1] - Doc Suffix of files should be scan, eg"
-    print "\t\t .m     - Object-C file"
-    print "\t\t .swift - Swift file"
-    print "\t\t .java  - Java file\n"
-    print "\t--max-distance=[input] - max hamming distance to keep, default is 20"
-    print "\t--min-linecount=[input] - for function scan, the function would be ignore if the total line count of the function less than min-linecount"
-    print "\t--functions - Use Functions as code scan standard"
-    print "\t              Attention: The \"--functions\" support just Object-C and Java now"
-    print "\t--detail    - Show the detail of process\n"
-    print "\t--output=[intput] - Customize the output file, default is \"out.txt\""
+    print("Usage:\n")
+    print("\tpython SameFileFinder.python [arg0] [arg1]\n")
+    print("Args:\n")
+    print("\t[arg0] - Target Directory of files should be scan")
+    print("\t[arg1] - Doc Suffix of files should be scan, eg")
+    print("\t\t .m     - Object-C file")
+    print("\t\t .swift - Swift file")
+    print("\t\t .java  - Java file\n")
+    print("\t--max-distance=[input] - max hamming distance to keep, default is 20")
+    print("\t--min-linecount=[input] - for function scan, the function would be ignore if the total line count of the function less than min-linecount")
+    print("\t--functions - Use Functions as code scan standard")
+    print("\t              Attention: The \"--functions\" support just Object-C and Java now")
+    print("\t--detail    - Show the detail of process\n")
+    print("\t--output=[intput] - Customize the output file, default is \"out.txt\"")
 
 ################ End Util Funcs ################
 
